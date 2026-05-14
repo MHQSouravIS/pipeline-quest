@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080810">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Pipeline Quest — DE + AI/ML Path</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="xpp" id="xpp"></div>
+<div class="tst" id="tst"></div>
+<div class="hdr">
+  <div class="logo">PIPELINE<span>/</span>QUEST</div>
+  <div class="hpills">
+    <div class="pill" id="hAlias" style="color:var(--cyan);border-color:rgba(0,212,255,0.3);background:var(--cd);font-size:9px;"></div>
+    <div class="pill ps" id="hS">🔥 0</div>
+    <div class="pill px" id="hX">⚡ 0</div>
+  </div>
+</div>
+<div class="lvlbar">
+  <div class="lvlrow"><span id="lvlL">LVL 1 — Raw Data</span><span id="lvlX">0 / 150 XP</span></div>
+  <div class="trk"><div class="trkf" id="trkF" style="width:0%"></div></div>
+</div>
+<nav class="nav">
+  <button class="nb on" onclick="go('today',this)"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>TODAY</button>
+  <button class="nb" onclick="go('map',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>MAP</button>
+  <button class="nb" onclick="go('mentor',this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>MENTOR</button>
+  <button class="nb" onclick="go('stats',this)"><svg viewBox="0 0 24 24"><rect x="18" y="3" width="4" height="18"/><rect x="10" y="8" width="4" height="13"/><rect x="2" y="13" width="4" height="8"/></svg>STATS</button>
+</nav>
+<div class="main">
+  <div class="pane on" id="pane-today"><div id="tcon"></div></div>
+  <div class="pane" id="pane-map">
+    <div class="rrow">
+      <svg width="64" height="64" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#1c1c30" stroke-width="6"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#ff6b2b" stroke-width="6" stroke-dasharray="163.36" stroke-dashoffset="163.36" stroke-linecap="round" transform="rotate(-90 32 32)" id="ringC"/>
+      </svg>
+      <div>
+        <div style="font-size:18px;font-weight:700;font-family:var(--mono);color:var(--pipe);" id="rPct">0%</div>
+        <div style="font-size:11px;color:var(--t2);" id="rSub">0 of 120 days</div>
+        <div style="font-size:11px;color:var(--pipe);margin-top:3px;" id="rPh">Phase 1 active</div>
+      </div>
+    </div>
+    <div class="pmap" id="pmap"></div>
+  </div>
+  <div class="pane" id="pane-mentor">
+    <div class="card cp" style="padding:12px;">
+      <div class="cl">AI MENTOR — KNOWS YOUR FULL BACKGROUND</div>
+      <div class="clog" id="clog"></div>
+      <div class="crow">
+        <input class="ci" id="cin" placeholder="Ask anything..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendC()}"/>
+        <button class="csnd" id="csnd" onclick="sendC()">SEND</button>
+      </div>
+    </div>
+    <div class="cl" style="padding:0 2px;">QUICK ASKS</div>
+    <div class="chips">
+      <div class="chip" onclick="qa('What should I focus on today?')">Today's focus</div>
+      <div class="chip" onclick="qa('Explain window functions with a healthcare data example')">Window functions</div>
+      <div class="chip" onclick="qa('What is Apache Airflow and why do I need it?')">What is Airflow?</div>
+      <div class="chip" onclick="qa('How does dbt differ from writing SQL manually?')">dbt vs SQL</div>
+      <div class="chip" onclick="qa('Explain vector databases — I already built a RAG chatbot')">Vector DBs</div>
+      <div class="chip" onclick="qa('What DE jobs exist in Guwahati or remote India?')">Jobs in Guwahati</div>
+      <div class="chip" onclick="qa('How do I frame my SEH pipeline work on a DE resume?')">Resume framing</div>
+      <div class="chip" onclick="qa('Difference between a data lake and a data warehouse')">Lake vs warehouse</div>
+      <div class="chip" onclick="qa('What is Kafka and when would I use it?')">Kafka explained</div>
+      <div class="chip" onclick="qa('Am I on track for a DE + AI/ML infra role in 6 months?')">Am I on track?</div>
+    </div>
+  </div>
+  <div class="pane" id="pane-stats">
+    <div class="sg">
+      <div class="sc"><div class="sn" style="color:var(--gold)" id="stX">0</div><div class="sl">TOTAL XP</div></div>
+      <div class="sc"><div class="sn" style="color:var(--pipe)" id="stS">0</div><div class="sl">DAY STREAK</div></div>
+      <div class="sc"><div class="sn" style="color:var(--green)" id="stD">0</div><div class="sl">DAYS DONE</div></div>
+      <div class="sc"><div class="sn" style="color:var(--cyan)" id="stC">0</div><div class="sl">CORRECT ANS</div></div>
+    </div>
+    <div class="card" style="margin-bottom:10px;"><div class="cl">LAST 28 DAYS</div><div class="stgrid" id="stgrid"></div></div>
+    <div class="card"><div class="cl">ACHIEVEMENTS</div><div class="bgw" id="bgw"></div></div>
+  </div>
+</div>
+<script src="data.js"></script>
+<script src="core.js"></script>
+<script src="app.js"></script>
+<script src="sync.js"></script>
+</body>
+</html>
