@@ -24,14 +24,33 @@ const BG=[
 {id:'b8',i:'🤖',n:'ML infra built',f:s=>s.dn.includes(93)},
 {id:'b9',i:'🏆',n:'Pipeline Master',f:s=>s.dn.includes(120)},
 ];
-const DEF={xp:0,st:0,ld:'',dn:[],cr:0,tot:0,ch:[],cd:1};
+const DEF={xp:0,st:0,ld:'',dn:[],cr:0,tot:0,ch:[],cd:1,tp:[],pj:[],ts:{},pjs:{}};
 let S={...DEF};
 try{const r=localStorage.getItem('pqv2');if(r){const p=JSON.parse(r);S={...DEF,...p};}}catch(e){}
-function sv(){try{localStorage.setItem('pqv2',JSON.stringify(S));}catch(e){}}
+let _saveT=null;
+function sv(){
+  try{localStorage.setItem('pqv2',JSON.stringify(S));}catch(e){}
+  // Autosave visual indicator
+  let el=document.getElementById('savedPill');
+  if(!el){
+    el=document.createElement('div');
+    el.id='savedPill';el.className='savedPill';
+    el.innerHTML='<span class="savedDot"></span>SAVED';
+    document.body.appendChild(el);
+  }
+  el.classList.add('on');
+  if(_saveT)clearTimeout(_saveT);
+  _saveT=setTimeout(()=>el.classList.remove('on'),1100);
+}
 let qa2=false;
 function getDay(){return D.find(d=>d.d===S.cd)||D[0];}
 function rToday(){
   qa2=false;
+  // Phase gate check — if a previous phase has unfinished test/project, surface it
+  if(typeof tryRenderGate==='function' && !window.SKIP_GATE_ONCE){
+    if(tryRenderGate())return;
+  }
+  window.SKIP_GATE_ONCE=false;
   const d=getDay();
   const done=S.dn.includes(d.d);
   const ph=PH.find(p=>p.id===d.ph)||PH[0];

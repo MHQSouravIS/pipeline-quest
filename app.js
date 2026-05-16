@@ -6,7 +6,12 @@ function mkDone(){
   const td=new Date().toISOString().slice(0,10);
   if(S.ld){const diff=(new Date(td)-new Date(S.ld))/864e5;S.st=diff<=1?S.st+1:1;}else S.st=1;
   S.ld=td;
-  if(d.d<120)S.cd=d.d+1;
+  // Advance to next day unless this is the last day of a phase — gate will handle routing
+  if(d.d<120){
+    const phDays=D.filter(x=>x.ph===d.ph);
+    const isLastOfPhase=phDays[phDays.length-1].d===d.d;
+    if(!isLastOfPhase)S.cd=d.d+1;
+  }
   sv();uhdr();toast('DAY '+d.d+' COMPLETE! +'+d.xp+' XP');
   checkBadges();rToday();
 }
@@ -31,6 +36,19 @@ function go(id,btn){
 }
 
 function oL(u){window.open(u,'_blank');}
+
+function openGate(phId){
+  // Show the gate's current stage for this phase (test or project, or review if cleared)
+  go('today',document.querySelectorAll('.nb')[0]);
+  if(S.tp.includes(phId) && S.pj.includes(phId)){
+    // Both cleared — show project view as a read-only review
+    renderProject(phId);
+  }else if(S.tp.includes(phId)){
+    renderProject(phId);
+  }else{
+    renderGateIntro(phId,'test');
+  }
+}
 
 function showXP(txt){
   const el=document.getElementById('xpp');el.textContent=txt;el.classList.add('on');
@@ -64,15 +82,36 @@ function rMap(){
   ring.style.strokeDashoffset=163.36-(163.36*(pct/100));
   let h='';
   PH.forEach(ph=>{
-    h+=`<div class="psep" style="color:${ph.col};background:${ph.col}15;border:1px solid ${ph.col}44;">${ph.label}: ${ph.name}</div>`;
-    const days=D.filter(d=>d.ph===ph.id);
-    days.forEach(d=>{
+    const phDays=D.filter(d=>d.ph===ph.id);
+    const allDaysDone=phDays.every(d=>S.dn.includes(d.d));
+    const testPassed=S.tp.includes(ph.id);
+    const projDone=S.pj.includes(ph.id);
+    let badge='';
+    if(allDaysDone && testPassed && projDone)badge='<span style="font-family:var(--mono);font-size:8px;color:var(--green);background:var(--gd);border:1px solid rgba(57,255,110,0.3);padding:2px 7px;border-radius:99px;margin-left:8px;">✓ CLEARED</span>';
+    else if(allDaysDone && testPassed)badge='<span style="font-family:var(--mono);font-size:8px;color:var(--purple);background:rgba(189,147,249,0.12);border:1px solid rgba(189,147,249,0.35);padding:2px 7px;border-radius:99px;margin-left:8px;">PROJECT PENDING</span>';
+    else if(allDaysDone)badge='<span style="font-family:var(--mono);font-size:8px;color:var(--gold);background:var(--god);border:1px solid rgba(255,209,102,0.3);padding:2px 7px;border-radius:99px;margin-left:8px;">TEST PENDING</span>';
+    h+=`<div class="psep" style="color:${ph.col};background:${ph.col}15;border:1px solid ${ph.col}44;">${ph.label}: ${ph.name}${badge}</div>`;
+    phDays.forEach(d=>{
       const done=S.dn.includes(d.d),ac=S.cd===d.d;
       h+=`<div class="pnode"><div class="ndot ${done?'dn2':ac?'ac':''}">${done?'✓':d.d}</div>`;
       h+=`<div class="nbody ${done?'dnn':ac?'acn':''}" onclick="S.cd=${d.d};sv();go('today',document.querySelectorAll('.nb')[0])">`;
       h+=`<div class="nday">DAY ${d.d}</div><div class="ntitle">${d.t}</div>`;
       h+=`<div class="nsub">${done?'Completed':ac?'Current':'Locked'}</div></div></div>`;
     });
+    // Gate node — test + project for this phase
+    if(allDaysDone || testPassed || projDone){
+      const gateState=projDone?'done':testPassed?'project':'test';
+      const gateLabel=gateState==='done'?'✓ Phase Cleared':gateState==='project'?'Capstone Project':'Phase Test';
+      const gateSub=gateState==='done'?'Test passed · Project submitted':gateState==='project'?'Test passed — submit project to unlock next phase':'Pass the test to access the project';
+      h+=`<div class="pnode" style="margin-bottom:14px;">
+        <div class="ndot" style="border-color:${gateState==='done'?'var(--green)':'var(--gold)'};background:${gateState==='done'?'var(--gd)':'var(--god)'};color:${gateState==='done'?'var(--green)':'var(--gold)'};">${gateState==='done'?'✓':'🔒'}</div>
+        <div class="nbody" style="border-color:${gateState==='done'?'rgba(57,255,110,0.3)':'rgba(255,209,102,0.3)'};cursor:${allDaysDone?'pointer':'default'};opacity:${allDaysDone?1:0.5};" ${allDaysDone?`onclick="openGate('${ph.id}')"`:''}>
+          <div class="nday" style="color:${gateState==='done'?'var(--green)':'var(--gold)'};">${ph.label} GATE</div>
+          <div class="ntitle">${gateLabel}</div>
+          <div class="nsub">${gateSub}</div>
+        </div>
+      </div>`;
+    }
   });
   el.innerHTML=h;
 }
